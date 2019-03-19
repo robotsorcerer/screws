@@ -1,8 +1,8 @@
-Some useful formula in screw theory for robotics
+Some useful formulae in screw theory for robotics
 
 Detailed README coming soon, posr-thesis defense
 
-+ [rodrigues](/rodrigures.m): Given a vector, w, and an angle, theta, computes the exponential map of an angle. This is akin to the rigid body transformation of a body about an axis w, through a point q, by an angle theta
++ [rodrigues](/rodrigues.m): Given a vector, w, and an angle, theta, computes the exponential map of an angle. This is akin to the rigid body transformation of a body about an axis w, through a point q, by an angle theta
 
 + [skewsem](skewsem.m): Computes the antisymmetric or skew symmetric matrix from a 3D vector w = [wx, wy, wz]
 
