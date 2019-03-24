@@ -64,10 +64,13 @@ t = T;
 F = [diff(r, R), diff(r, T) diff(r, Z); ...
      diff(t, R), diff(t, T) diff(t, Z);
      diff(z, R), diff(z, T) diff(z, Z)];
-    
+
+ F = [R/(r*lambda3) 0 0; 0 r/R 0; 0 0 lambda3];
 
 lambda1 = R*L/(r*ell);
 lambda2 = r/R;
 lambda3 = ell/L;
 
 I2 = simplify(1/lambda1^2 + 1/lambda2^2 + lambda1^2*lambda2^2);
+
+R/(r^2*lambda3)
