@@ -63,12 +63,16 @@ clc; clear all
 syms r R l L theta Theta real
 lambdaz = l/L;
 lambda  = r/R;
-F = [R^2/(r^2) 0 0; ...
-     0 r/R 0; ...
-     0 0 r/R];
+F = [R/(r*lambdaz) 0 0; ...
+     0 lambda 0; ...
+     0 0 lambdaz];
+
+ trace(F.' * F)
+ trace(pinv(F.') * pinv(F))
+  trace(pinv(F*F.'))
 %% 
-% clc; clear all
-% syms F real
+clc; clear all
+syms F real
 lc = F*F';
 rc = F'*F;
 diff(trace(rc))
