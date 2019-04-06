@@ -65,23 +65,6 @@ x = simplify(fu/norm(fu)); y = simplify(fv/norm(fv)); z = simplify(f/R);
 x = [-sin(u)*cos(v), sin(u)*sin(v), cos(u)].';
 y = [-sin(v), -cos(v), 0].';
 z = [cos(u) * cos(v), -cos(u)*sin(v), sin(u)];
-K = simplify([x, y].' * [(diff(z, u)/norm(fu)).', (diff(z, u)/norm(fv)).']);
+K = [x, y].' * [diff(z, u)/norm(fu), diff(z, u)/norm(fv)];
 T = simplify(y.' * [diff(x, u)/norm(fu), diff(x, v)/norm(fv)]);
 
-syms p real;
-Rpsi = [cos(p), -sin(p); -sin(p), -cos(p)];
-%% Example Murray book, 1990
-clc; clear all
-syms u R v1 v2 w1 w2 real
-Ko = zeros(2,2); Mo = eye(2,2); To = zeros(1, 2);
-Kf = [1/R, 0; 0, 1/R]; Mf = [R 0; 0 R*cos(u)]; Tf = [0, -tan(u)/R];
-
-wt = [w1, w2].'; vt = [v1, v2].';
-alpha_o = simplify(alpha_head(Mo, Ko, Kf, wt, vt))
-alpha_iab = simplify(alpha_iab(Mo, Ko, Kf, wt, vt))
-
-% syms p real;
-% Rpsi = [cos(p), -sin(p); -sin(p), -cos(p)];
-% Kf_tilde = Rpsi*Kf*Rpsi;
-% rel_curve = pinv(Ko+Kf_tilde);
-% alpha_h = pinv(Mo) * rel_curve * (wt - Kf_tilde*vt);
