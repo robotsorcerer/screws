@@ -78,7 +78,8 @@ Kf = [1/R, 0; 0, 1/R]; Mf = [R 0; 0 R*cos(u)]; Tf = [0, -tan(u)/R];
 
 wt = [w1, w2].'; vt = [v1, v2].';
 alpha_o = simplify(alpha_head(Mo, Ko, Kf, wt, vt))
-alpha_iab = simplify(alpha_iab(Mo, Ko, Kf, wt, vt))
+alpha_f = simplify(alpha_iab(Mf, Ko, Kf, wt, vt))
+psi_d = psi_dot(To, Mo, Tf, Mf, alpha_o, alpha_f)
 
 % syms p real;
 % Rpsi = [cos(p), -sin(p); -sin(p), -cos(p)];
