@@ -72,17 +72,70 @@ syms p real;
 Rpsi = [cos(p), -sin(p); -sin(p), -cos(p)];
 %% Example Murray book, 1990
 clc; clear all
-syms u R v1 v2 w1 w2 real
-Ko = zeros(2,2); Mo = eye(2,2); To = zeros(1, 2);
-Kf = [1/R, 0; 0, 1/R]; Mf = [R 0; 0 R*cos(u)]; Tf = [0, -tan(u)/R];
+syms u R w v v1 v2 w1 w2 real
+use_simplified = false;
 
-wt = [w1, w2].'; vt = [v1, v2].';
-alpha_o = simplify(alpha_head(Mo, Ko, Kf, wt, vt))
-alpha_f = simplify(alpha_iab(Mf, Ko, Kf, wt, vt))
-psi_d = psi_dot(To, Mo, Tf, Mf, alpha_o, alpha_f)
+% define surface mapping function and its derivative
+f = [R * cos(u) * cos(v), -R * cos(u) *sin(v), R*sin(u)];
+fu = diff(f, u); fv = diff(f, v);
+% define coordinate axes of normalized gauss frame
+if(use_simplified)
+    x = simplify(fu/norm(fu)); 
+    y = simplify(fv/norm(fv)); 
+    z = simplify(f/R);
+else
+    x = [-sin(u)*cos(v), sin(u)*sin(v), cos(u)].';
+    y = [-sin(v), -cos(v), 0].';
+    z = [cos(u) * cos(v), -cos(u)*sin(v), sin(u)];
+end
 
-% syms p real;
-% Rpsi = [cos(p), -sin(p); -sin(p), -cos(p)];
-% Kf_tilde = Rpsi*Kf*Rpsi;
-% rel_curve = pinv(Ko+Kf_tilde);
-% alpha_h = pinv(Mo) * rel_curve * (wt - Kf_tilde*vt);
+% determine xh, yh 
+xh = fu/R;
+yh = fv/(R*cos(u));
+zh = f/R;
+
+% define normal vector to a point on the surface (here, a plane)
+nh = f/R;
+
+% define tensor forms for IAB and head
+% Kh = zeros(2,2); Mh = eye(2,2); Th = zeros(1, 2);
+% K_iab = [1/R, 0; 0, 1/R]; M_iab = [R 0; 0 R*cos(u)]; T_iab = [0, -tan(u)/R];
+
+% curvatures from first principles (eqs 2.67 thesis)
+norm_dfdu = R;
+norm_dfdv = R*cos(u);
+
+% metric forms
+M_iab = diag([norm_dfdu, norm_dfdv]);
+Mh = diag([1, 1]);
+
+% curvature forms
+K_iab = [xh.', yh.'].' * [(diff(nh, u)/norm_dfdu).', (diff(nh, v)/norm_dfdv).'];
+K_iab = simplify(K_iab);
+Kh = zeros(2,2);
+
+%Torsion Equations
+T_iab = yh * [(diff(xh, u)/norm_dfdu).', (diff(xh, v)/norm_dfdv).'];
+T_iab = simplify(T_iab);
+Th = zeros([1, 2]);
+
+% define twist components
+w = [w1, w2, 0].'; v = [v1, v2, 0].';
+% w = [-w2, w1, 0].'; v = [v1, v2, 0].';
+
+% determine rolling velocity of the head
+fh = [0,0,0];
+wt = simplify([xh.', yh.'].' * cross(nh, w).');
+vt = simplify([xh.', yh.'].' * (cross(fh, w)+ v).');
+
+% define relative rotational velocity projected to a surface normal
+w_n = zh * w;
+
+% solve it
+syms p real;
+%p = 0; % rolling on a plane; x axes coincide
+Rpsi = [cos(p), -sin(p); -sin(p), -cos(p)];
+
+alpha_o = simplify(alpha_head(Mh, Kh, K_iab, wt(1:2), vt(1:2), Rpsi))
+alpha_f = simplify(alpha_iab(M_iab, Kh, K_iab, wt(1:2), vt(1:2), Rpsi))
+psi_d = psi_dot(Th, Mh, T_iab, M_iab, alpha_o, alpha_f, w_n)
