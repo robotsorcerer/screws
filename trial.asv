@@ -86,3 +86,23 @@ psi_d = psi_dot(To, Mo, Tf, Mf, alpha_o, alpha_f)
 % Kf_tilde = Rpsi*Kf*Rpsi;
 % rel_curve = pinv(Ko+Kf_tilde);
 % alpha_h = pinv(Mo) * rel_curve * (wt - Kf_tilde*vt);
+
+%% 
+clc; clear all
+syms r p real
+B = zeros(6, 2);
+B(1,1) = 1; B(2, 2) = 1;
+G = [eye(3), zeros(3,3); skewsem([r*cos(p), r*sin(p), 0]), eye(3)] * B
+
+%% IAB dynamics
+clc; clear all
+syms r l t p
+rr = [r*cos(t)*sin(p); r*sin(t)*sin(p); r*cos(p)];
+% rrd = simplify(diff(rr, r) + diff(rr, t)+ diff(rr, p));
+syms rd td pd
+rrd =  [rd*cos(t)*sin(p) + r*pd*cos(p)*cos(t) - r*td*sin(p)*sin(t);
+ rd*sin(p)*sin(t) + r*pd*cos(p)*sin(t) + r*td*cos(t)*sin(p);
+                                 rd*cos(p) - r*pd*sin(p)]
+                             
+                             %% 
+                             syms r t p

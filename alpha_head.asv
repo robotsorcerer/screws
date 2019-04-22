@@ -1,3 +1,0 @@
-function alpha_h = alpha_head(Mh, Kh, K1, wt, vt)
-Mhinv = pinv(Mh);
-K1_tilde = Rpsi*K1*Rsi
