@@ -140,10 +140,4 @@ alpha_o = simplify(alpha_head(Mh, Kh, K_iab, wt(1:2), vt(1:2), Rpsi))
 alpha_f = simplify(alpha_iab(M_iab, Kh, K_iab, wt(1:2), vt(1:2), Rpsi))
 psi_d = psi_dot(Th, Mh, T_iab, M_iab, alpha_o, alpha_f, w_n)
 
-%% Functional derivatives
-clc; clear all
-syms r theta phi R(r, theta, phi)
-X = [r *cos(theta) *sin(phi); ...
-     r *sin(theta) *sin(phi); ...
-     r *cos(phi)];
-xdot = functionalDerivative(X, r);
+%% Functio
