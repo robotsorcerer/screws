@@ -147,3 +147,14 @@ X = [r *cos(theta) *sin(phi); ...
      r *sin(theta) *sin(phi); ...
      r *cos(phi)];
 xdot = functionalDerivative(X, r);
+
+
+%% PDE for deformation
+clc; close all;
+path_to_sphere = '/Users/olalekanogunmolu/Documents/superchicko/sofa/IAB8/compoz';
+N = 3; % describes the complete kinematics of the IAB
+model = createpde(N);
+importGeometry(model, strcat(path_to_sphere, '/sphere.STL')); % import solidworks geom
+%geometryFromEdges(model,g); % geometryFromEdges for 2-D
+
+pdegplot(model,'FaceLabels','on') % 'FaceLabels' for 3-D
