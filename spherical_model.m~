@@ -48,31 +48,8 @@ structuralBC(model,'Face',1,'Constraint','symmetric'); % symmetric isochoric
 structuralBodyLoad(model,'GravitationalAcceleration',[0;0;-9.8]);
 
 %% Multisphere
-close all; clc
-gm = multisphere([50 67])
-model = createpde('structural','static-solid')
+gm = multisphere([20 25])
+model = createpde(1)
 model.Geometry = gm
 
-pdegplot(model,'CellLabels','on','FaceAlpha',0.4,'FaceLabels','on')
-title('IAB with incompressibility constraints');
-% For each SoRo, specify the Young's modulus, Poisson ratio and mass
-% density
-structuralProperties(model, 'Cell', 1, 'YoungsModulus',110E9,...
-            'PoissonsRatio',.45,'MassDensity',45);
-structuralProperties(model, 'Cell', 2, 'YoungsModulus',200E9,...
-            'PoissonsRatio',.45,'MassDensity',45);
-% define the boundary conditions
-structuralBC(model,'Face',1,'Constraint','symmetric'); % symmetric isochoric
-structuralBC(model,'Face',2,'Constraint','symmetric'); % symmetric isochoric
-
-% Specify boundary loads for structural model
-%Specify the gravity load on the sphere.
-structuralBodyLoad(model, 'GravitationalAcceleration',[0;0;-9.8]);
-
-% Specify surface traction for faces 1 and 2
-structuralBoundaryLoad(model,'Face',[1,2],'SurfaceTraction',[0;0;100])
-
-%specify contact-free pressure as a function handle (see thesis)
-int_pressure = @(region,state)5E7
-
-structuralBoundaryLoad(structuralmodel,'Face',12,'Pressure',int_pressure)
+pdegplot(model,'CellLabels','on','FaceAlpha',0.2)
