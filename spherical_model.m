@@ -40,14 +40,14 @@ title('Rear view')
 
 % specify material moduli, poison ratio for the deformation;
 structuralProperties(model,'YoungsModulus',200e9,...
-            'PoissonsRatio',.45,'MassDensity',45);
+            'PoissonsRatio',.45,'MassDensity',.5/386);
 % define the boundary conditions
 structuralBC(model,'Face',1,'Constraint','symmetric'); % symmetric isochoric
 
 %Specify the gravity load on the sphere.
 structuralBodyLoad(model,'GravitationalAcceleration',[0;0;-9.8]);
 
-%% Multisphere
+%% Multisphere; Concentric sphere with internal cavity
 close all; clc
 gm = multisphere([50 67])
 model = createpde('structural','static-solid')
@@ -73,6 +73,6 @@ structuralBodyLoad(model, 'GravitationalAcceleration',[0;0;-9.8]);
 structuralBoundaryLoad(model,'Face',[1,2],'SurfaceTraction',[0;0;100])
 
 %specify contact-free pressure as a function handle (see thesis)
-int_pressure = @(region,state)5E7
+int_pressure = @(location,state)5E7.*sin(25.*state.time);
 
-structuralBoundaryLoad(structuralmodel,'Face',12,'Pressure',int_pressure)
+structuralBoundaryLoad(model,'Face',2,'Pressure',int_pressure)
