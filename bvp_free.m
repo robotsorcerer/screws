@@ -20,9 +20,9 @@ function [P, model, result] = bvp_free(C1, C2, Ri, Ro, rho, nu, varargin)
     gm = multisphere([Ri, Ro]);
     model = createpde('structural','static-solid');
     model.Geometry = gm;
-
-    pdegplot(model,'CellLabels','on','FaceAlpha',0.4,'FaceLabels','on')
-    title('IAB with incompressibility constraints');
+% 
+%     pdegplot(model,'CellLabels','on','FaceAlpha',0.4,'FaceLabels','on')
+%     title('IAB with incompressibility constraints');
 
     % For each SoRo, specify the Young's modulus, Poisson ratio and mass
     % density
@@ -51,9 +51,8 @@ function [P, model, result] = bvp_free(C1, C2, Ri, Ro, rho, nu, varargin)
     %sphere_thickness = 1e-1;
     start = tic;
     generateMesh(model); %, 'Hmax', sphere_thickness);
-    figure
-    pdeplot3D(model)
-    title('Spherical IAB with Quadratic Elements')
+%     pdeplot3D(model)
+%     title('Spherical IAB with Quadratic Tetrahedron Elements')
     fprintf('Time to mesh: %f seconds', toc(start))
 
     % calculate the solution

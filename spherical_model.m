@@ -1,7 +1,7 @@
 %% dyadics in spherical coordinates
 clear all; clc
 syms ri Ri R T Ph ph t p C1 C2  real
-r = (R^3 + ri^3 - Ri^3)^(1/3); t = T; ph = Ph;
+r = (Ro^3 + ri^3 - Ri^3)^(1/3); t = T; ph = Ph;
 F = [R^2/r^2   0     0;...
            0         r/R     0; ...
            0            0           r/R];  
@@ -18,6 +18,8 @@ integ_int = sigma_tt + sigma_pp - 2 * sigma_rr;
 simplify(integ_int)
 
 %% Deformation analysis
+% some useful examples
+% https://www.mathworks.com/help/pde/examples/dynamic-analysis-of-a-clamped-beam.html
 clc; clear all; close all
 %profile on -history
 
@@ -51,7 +53,7 @@ structuralBC(model,'Face',1,'Constraint','symmetric'); % symmetric isochoric
 %Specify the gravity load on the sphere.
 structuralBodyLoad(model,'GravitationalAcceleration',[0;0;-9.8]);
 
-%% Multisphere; Concentric sphere with internal cavity
+%% Multisphere Example I;
 close all; clc; clear all
 homedir = '/home/lex/';
 savedir = 'Documents/Papers/PhDThesis/figures/deformation';
@@ -114,4 +116,56 @@ figure
 pdeplot3D(model,'ColorMapData',...
     result.Stress.sxx+result.Stress.syy+result.Stress.szz)
 title('Normal Stress')
+colormap('jet')
+
+%% Multisphere example II
+close all; clc; 
+
+start = tic;
+[Ri, Ro] = deal(.45, .75);  % 50cm 70 cm
+
+% material moduli for internal and external IAB skin
+[C1, C2] = deal(500000, 1000000);
+% IAB material density
+[rho, nu] = deal(45, .4995);  % cue from dynamics of recatangular block example
+ri = .2; % meters
+close all
+[P, model, result] = bvp_free(C1, C2, Ri, Ro, rho, nu, ri)
+fprintf('Time to run: %f seconds', toc(start))
+
+homedir = '/Users/olalekanogunmolu/';
+full_path=fullfile(homedir, savedir);
+% Plot the displacements
+figure(1)
+subplot(131)
+pdeplot3D(model,'ColorMapData',result.Displacement.ux);
+title('x-displacement')
+% : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
+colormap('jet')
+
+subplot(132)
+pdeplot3D(model,'ColorMapData',result.Displacement.uy);
+xlabel('Time')
+title('y-displacement')
+colormap('jet')
+
+subplot(133)
+pdeplot3D(model,'ColorMapData',result.Displacement.uz);
+title('z-displacement')
+% : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
+colormap('jet')
+
+figure(2)
+subplot(131)
+pdegplot(model,'CellLabels','on','FaceAlpha',0.6,'FaceLabels','off')
+title('Incompressible IAB');
+
+subplot(132)
+pdeplot3D(model)
+title('Tetrahedral Discretization')
+
+subplot(133)
+pdeplot3D(model,'ColorMapData',result.Displacement.Magnitude);
+title('Overall Displacement')
+% : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)'
 colormap('jet')
