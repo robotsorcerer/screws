@@ -13,3 +13,6 @@ Some useful formulae in screw theory for robotics
 + [psi_dot](/psi_dot.m): computes the relative orientation between the tangent planes of two coordinate charts in R^2. The rotation angle through an angle \psi aligns the manipulating object's x-axis to the x-axis of the manipulated object. \psi is so chosen such that a rotation about the z-axis by \psi aligns the xy-axes of both objects (see Montana, 1988).
 
 + [contact_kinematics](/contact_kinematics.m): A simple illustration of the contact dynamics between two rigid, or semi rigid objects in R^3. The examples assume that the objects are spheres with single coordinate charts as defined in [Murray, 1990].
+
++ [bvp_free](/bvp_free.m): comptes the contact free boundary value deformation for a desired extension/compression of the SoRO model
+  Result is the pressure

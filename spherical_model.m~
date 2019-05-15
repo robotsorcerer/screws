@@ -19,13 +19,14 @@ simplify(integ_int)
 
 %% Deformation analysis
 clc; clear all; close all
-homedir = '/home/lex/';
-otherpath = 'Documents/superchicko/sofa/IAB8/compoz';
+profile on -history
+%{
 sphere_path=fullfile(homedir, otherpath, 'sphere.STL');
 % model = createpde(1);
 model = createpde('structural', 'static-solid');
 importGeometry(model, sphere_path);
-%% Plots
+
+% Plots
 close all
 figure(1)
 subplot(211)
@@ -46,33 +47,59 @@ structuralBC(model,'Face',1,'Constraint','symmetric'); % symmetric isochoric
 
 %Specify the gravity load on the sphere.
 structuralBodyLoad(model,'GravitationalAcceleration',[0;0;-9.8]);
-
+%}
 %% Multisphere; Concentric sphere with internal cavity
-close all; clc
-gm = multisphere([50 67])
-model = createpde('structural','static-solid')
-model.Geometry = gm
+close all; clc; clear all
+homedir = '/home/lex/';
+savedir = 'Documents/Papers/PhDThesis/figures/deformation';
 
-pdegplot(model,'CellLabels','on','FaceAlpha',0.4,'FaceLabels','on')
-title('IAB with incompressibility constraints');
-% For each SoRo, specify the Young's modulus, Poisson ratio and mass
-% density
-structuralProperties(model, 'Cell', 1, 'YoungsModulus',110E9,...
-            'PoissonsRatio',.45,'MassDensity',45);
-structuralProperties(model, 'Cell', 2, 'YoungsModulus',200E9,...
-            'PoissonsRatio',.45,'MassDensity',45);
-% define the boundary conditions
-structuralBC(model,'Face',1,'Constraint','symmetric'); % symmetric isochoric
-structuralBC(model,'Face',2,'Constraint','symmetric'); % symmetric isochoric
+% Testing BVP for Contact free system
+cd('/home/lex/Documents/MATLAB/screws');
+start = tic;
+[Ri, Ro] = deal(.5, .7);  % 50cm 70 cm
 
-% Specify boundary loads for structural model
-%Specify the gravity load on the sphere.
-structuralBodyLoad(model, 'GravitationalAcceleration',[0;0;-9.8]);
+% material moduli for internal and external IAB skin
+[C1, C2] = deal(11000, 22000);
+% IAB material density
+[rho, nu] = deal(.38/386., .48);  % cue from dynamics of recatangular block example
+ri = .65; % meters
+close all
+[P, result] = bvp_free(C1, C2, Ri, Ro, rho, nu, ri)
+fprintf('Time to run: %f seconds', toc(start))
 
-% Specify surface traction for faces 1 and 2
-structuralBoundaryLoad(model,'Face',[1,2],'SurfaceTraction',[0;0;100])
 
-%specify contact-free pressure as a function handle (see thesis)
-int_pressure = @(location,state)5E7.*sin(25.*state.time);
+%% Examine solution
+minUz = min(result.Displacement.uz);
+fprintf('Maximal deflection in the z-direction is %g meters.',minUz)
 
-structuralBoundaryLoad(model,'Face',2,'Pressure',int_pressure)
+full_path=fullfile(homedir, savedir);
+% Plot the displacements
+figure(3)
+g3 = pdeplot3D(model,'ColorMapData',result.Displacement.ux);
+title('x-displacement')
+% : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
+colormap('jet')
+saveas(g3, fullfile(full_path, 'xdisp-aber.png'))
+
+figure(4)
+pdeplot3D(model,'ColorMapData',result.Displacement.uy);
+xlabel('Time')
+title('y-displacement')
+grid('on')
+colormap('jet')
+saveas(gcf, fullfile(full_path, 'ydisp.png'))
+
+figure(5)
+pdeplot3D(model,'ColorMapData',result.Displacement.uz);
+title('z-displacement')
+% : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
+colormap('jet')
+saveas(gcf, fullfile(full_path, 'zdisp.png'))
+
+figure(6)
+pdeplot3D(model,'ColorMapData',result.Displacement.Magnitude);
+title('Overall Displacement')
+% : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)'
+grid('on')
+colormap('jet')
+saveas(gcf, fullfile(full_path, 'alldisp.png'))

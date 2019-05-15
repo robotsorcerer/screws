@@ -19,28 +19,32 @@ simplify(integ_int)
 
 %% Deformation analysis
 clc; clear all; close all
+%profile on -history
+
 homedir = '/home/lex/';
 otherpath = 'Documents/superchicko/sofa/IAB8/compoz';
 sphere_path=fullfile(homedir, otherpath, 'sphere.STL');
-% model = createpde(1);
-model = createpde('structural', 'static-solid');
+model = createpde(1);
 importGeometry(model, sphere_path);
-%% Plots
+
+% Plots
 close all
 figure(1)
-subplot(211)
 pdegplot(model,'FaceLabels','on')
 view(30,30);
-title('Frontal view')
+title('Solidworks Model')
 
-subplot(212)
-pdegplot(model,'FaceLabels','on')
-view(30,30);
-title('Rear view')
+applyBoundaryCondition(model,'dirichlet','face',1,'u',0);
 
+% material moduli for internal and external IAB skin
+[C1, C2] = deal(11000, 22000);
+[rho, nu] = deal(.5/386., .45); 
 % specify material moduli, poison ratio for the deformation;
-structuralProperties(model,'YoungsModulus',200e9,...
-            'PoissonsRatio',.45,'MassDensity',.5/386);
+fun = @(R, r) 2.* C1*((1./r)-((R.^6)./(r.^7))) + ...
+           2.* C2*((r.^5)./(R.^6) - (R.^10)./(r.^11));
+
+P = integral(@(R)fun(R, ro), Ri, Ro);
+    
 % define the boundary conditions
 structuralBC(model,'Face',1,'Constraint','symmetric'); % symmetric isochoric
 
@@ -48,31 +52,66 @@ structuralBC(model,'Face',1,'Constraint','symmetric'); % symmetric isochoric
 structuralBodyLoad(model,'GravitationalAcceleration',[0;0;-9.8]);
 
 %% Multisphere; Concentric sphere with internal cavity
-close all; clc
-gm = multisphere([50 67])
-model = createpde('structural','static-solid')
-model.Geometry = gm
+close all; clc; clear all
+homedir = '/home/lex/';
+savedir = 'Documents/Papers/PhDThesis/figures/deformation';
 
-pdegplot(model,'CellLabels','on','FaceAlpha',0.4,'FaceLabels','on')
-title('IAB with incompressibility constraints');
-% For each SoRo, specify the Young's modulus, Poisson ratio and mass
-% density
-structuralProperties(model, 'Cell', 1, 'YoungsModulus',110E9,...
-            'PoissonsRatio',.45,'MassDensity',45);
-structuralProperties(model, 'Cell', 2, 'YoungsModulus',200E9,...
-            'PoissonsRatio',.45,'MassDensity',45);
-% define the boundary conditions
-structuralBC(model,'Face',1,'Constraint','symmetric'); % symmetric isochoric
-structuralBC(model,'Face',2,'Constraint','symmetric'); % symmetric isochoric
+% Testing BVP for Contact free system
+cd('/home/lex/Documents/MATLAB/screws');
+start = tic;
+[Ri, Ro] = deal(.5, .7);  % 50cm 70 cm
 
-% Specify boundary loads for structural model
-%Specify the gravity load on the sphere.
-structuralBodyLoad(model, 'GravitationalAcceleration',[0;0;-9.8]);
+% material moduli for internal and external IAB skin
+[C1, C2] = deal(11000, 22000);
+% IAB material density
+[rho, nu] = deal(.38/386., .45);  % cue from dynamics of recatangular block example
+ri = .2; % meters
+close all
+[P, model, result] = bvp_free(C1, C2, Ri, Ro, rho, nu, ri)
+fprintf('Time to run: %f seconds', toc(start))
+%% Examine solution
+minUz = min(result.Displacement.uz);
+fprintf('Maximal deflection in the z-direction is %g meters.',minUz)
 
-% Specify surface traction for faces 1 and 2
-structuralBoundaryLoad(model,'Face',[1,2],'SurfaceTraction',[0;0;100])
+full_path=fullfile(homedir, savedir);
+% Plot the displacements
+figure(3)
+pdeplot3D(model,'ColorMapData',result.Displacement.ux);
+title('x-displacement')
+% : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
+colormap('jet')
+%saveas(gcf, fullfile(full_path, 'xdisp.png'))
 
-%specify contact-free pressure as a function handle (see thesis)
-int_pressure = @(location,state)5E7.*sin(25.*state.time);
+figure(4)
+pdeplot3D(model,'ColorMapData',result.Displacement.uy);
+xlabel('Time')
+title('y-displacement')
+grid('on')
+colormap('jet')
+%saveas(gcf, fullfile(full_path, 'ydisp.png'))
 
-structuralBoundaryLoad(model,'Face',2,'Pressure',int_pressure)
+figure(5)
+pdeplot3D(model,'ColorMapData',result.Displacement.uz);
+title('z-displacement')
+% : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
+colormap('jet')
+%saveas(gcf, fullfile(full_path, 'zdisp.png'))
+
+figure(6)
+pdeplot3D(model,'ColorMapData',result.Displacement.Magnitude);
+title('Overall Displacement')
+% : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)'
+grid('on')
+colormap('jet')
+%saveas(gcf, fullfile(full_path, 'alldisp.png'))
+
+figure
+pdeplot3D(model,'ColorMapData',result.VonMisesStress)
+title('von Mises stress')
+colormap('jet')
+
+figure
+pdeplot3D(model,'ColorMapData',...
+    result.Stress.sxx+result.Stress.syy+result.Stress.szz)
+title('Normal Stress')
+colormap('jet')
