@@ -53,7 +53,7 @@ structuralBC(model,'Face',1,'Constraint','symmetric'); % symmetric isochoric
 %Specify the gravity load on the sphere.
 structuralBodyLoad(model,'GravitationalAcceleration',[0;0;-9.8]);
 
-%% Multisphere Example I;
+%% Multisphere Example I (Extension);
 close all; clc; clear all
 homedir = '/home/lex/';
 savedir = 'Documents/Papers/PhDThesis/figures/deformation';
@@ -61,96 +61,38 @@ savedir = 'Documents/Papers/PhDThesis/figures/deformation';
 % Testing BVP for Contact free system
 cd('/home/lex/Documents/MATLAB/screws');
 start = tic;
-[Ri, Ro] = deal(.5, .7);  % 50cm 70 cm
+[Ri, Ro] = deal(.1, .15);  % 50cm 70 cm
 
 % material moduli for internal and external IAB skin
-[C1, C2] = deal(11000, 22000);
+[C1, C2] = deal(500000, 600000); %eal(11000, 12000);
 % IAB material density
-[rho, nu] = deal(.38/386., .45);  % cue from dynamics of recatangular block example
-ri = .2; % meters
-close all
-[P, model, result] = bvp_free(C1, C2, Ri, Ro, rho, nu, ri)
+[rho, nu] = deal(.38/386., .487);  % cue from dynamics of recatangular block example
+ri = .13; % meters
+[P_Pa, model, ro, result] = bvp_free(C1, C2, Ri, Ro, rho, nu, 'extend', ri);
+P_psi = PressurePsi(P_Pa);
 fprintf('Time to run: %f seconds', toc(start))
-%% Examine solution
-minUz = min(result.Displacement.uz);
-fprintf('Maximal deflection in the z-direction is %g meters.',minUz)
-
-full_path=fullfile(homedir, savedir);
-% Plot the displacements
-figure(3)
-pdeplot3D(model,'ColorMapData',result.Displacement.ux);
-title('x-displacement')
-% : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
-colormap('jet')
-%saveas(gcf, fullfile(full_path, 'xdisp.png'))
-
-figure(4)
-pdeplot3D(model,'ColorMapData',result.Displacement.uy);
-xlabel('Time')
-title('y-displacement')
-grid('on')
-colormap('jet')
-%saveas(gcf, fullfile(full_path, 'ydisp.png'))
-
-figure(5)
-pdeplot3D(model,'ColorMapData',result.Displacement.uz);
-title('z-displacement')
-% : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
-colormap('jet')
-%saveas(gcf, fullfile(full_path, 'zdisp.png'))
-
-figure(6)
-pdeplot3D(model,'ColorMapData',result.Displacement.Magnitude);
-title('Overall Displacement')
-% : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)'
-grid('on')
-colormap('jet')
-%saveas(gcf, fullfile(full_path, 'alldisp.png'))
-
-figure
-pdeplot3D(model,'ColorMapData',result.VonMisesStress)
-title('von Mises stress')
-colormap('jet')
-
-figure
-pdeplot3D(model,'ColorMapData',...
-    result.Stress.sxx+result.Stress.syy+result.Stress.szz)
-title('Normal Stress')
-colormap('jet')
-
-%% Multisphere example II
-close all; clc; 
-
-start = tic;
-[Ri, Ro] = deal(.45, .75);  % 50cm 70 cm
-
-% material moduli for internal and external IAB skin
-[C1, C2] = deal(500000, 1000000);
-% IAB material density
-[rho, nu] = deal(45, .4995);  % cue from dynamics of recatangular block example
-ri = .2; % meters
-close all
-[P, model, result] = bvp_free(C1, C2, Ri, Ro, rho, nu, ri)
-fprintf('Time to run: %f seconds', toc(start))
-
-homedir = '/Users/olalekanogunmolu/';
+% Examine solution I
+%homedir = '/Users/olalekanogunmolu/';
+homedir = '/home/lex/';
 full_path=fullfile(homedir, savedir);
 % Plot the displacements
 figure(1)
 subplot(131)
-pdeplot3D(model,'ColorMapData',result.Displacement.ux);
+pdeplot3D(model,'ColorMapData',result.Displacement.ux*100);
 title('x-displacement')
 % : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
 colormap('jet')
+% colorbar('off')
 
 subplot(132)
-pdeplot3D(model,'ColorMapData',result.Displacement.uy);
+pdeplot3D(model,'ColorMapData',result.Displacement.uy*100);
 xlabel('Time')
 title('y-displacement')
 colormap('jet')
+% colorbar('off')
 
 subplot(133)
-pdeplot3D(model,'ColorMapData',result.Displacement.uz);
+pdeplot3D(model,'ColorMapData',result.Displacement.uz*100);
 title('z-displacement')
 % : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
 colormap('jet')
@@ -158,14 +100,178 @@ colormap('jet')
 figure(2)
 subplot(131)
 pdegplot(model,'CellLabels','on','FaceAlpha',0.6,'FaceLabels','off')
-title('Incompressible IAB');
+title('IAB Skins');
 
 subplot(132)
 pdeplot3D(model)
-title('Tetrahedral Discretization')
+title('Mesh Model')
 
 subplot(133)
-pdeplot3D(model,'ColorMapData',result.Displacement.Magnitude);
-title('Overall Displacement')
-% : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)'
+pdeplot3D(model,'ColorMapData',result.VonMisesStress);
+title('Stress distribution')
+colormap('jet')
+
+%% Multisphere example II (Extension)
+close all; clc; 
+
+start = tic;
+[Ri, Ro] = deal(.075, .1);  % 50cm 70 cm
+
+% material moduli for internal and external IAB skin
+[C1, C2] =  deal(500000, 600000);
+% IAB material density
+[rho, nu] = deal(1e-4, .45);  %deal(.38/386., .4995); %% cue from dynamics of recatangular block example
+ri = .12; % meters
+close all
+[P, model, ro, result] = bvp_free(C1, C2, Ri, Ro, rho, nu, 'extend', ri)
+fprintf('Time to run: %f seconds', toc(start));
+
+homedir = '/home/lex/';
+% homedir = '/Users/olalekanogunmolu/';
+full_path=fullfile(homedir, savedir);
+% Plot the displacements
+figure(1)
+subplot(131)
+pdeplot3D(model,'ColorMapData',result.Displacement.ux*100);
+title('x-displacement')
+% : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
+colormap('jet')
+colorbar('off')
+
+subplot(132)
+pdeplot3D(model,'ColorMapData',result.Displacement.uy*100);
+xlabel('Time')
+title('y-displacement')
+colormap('jet')
+colorbar('off')
+
+subplot(133)
+pdeplot3D(model,'ColorMapData',result.Displacement.uz*100);
+title('z-displacement')
+% : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
+colormap('jet')
+
+figure(2)
+subplot(131)
+pdegplot(model,'CellLabels','on','FaceAlpha',0.6,'FaceLabels','off')
+title('IAB Skins');
+
+subplot(132)
+pdeplot3D(model)
+title('Mesh Model')
+
+subplot(133)
+pdeplot3D(model,'ColorMapData',result.VonMisesStress);
+title('Stress distribution')
+colormap('jet')
+
+%% Multisphere Example III (Compression);
+close all; clc; clear all
+homedir = '/home/lex/';
+%homedir = '/Users/olalekanogunmolu/';
+savedir = 'Documents/Papers/PhDThesis/figures/deformation';
+
+% Testing BVP for Contact free system
+cd('/home/lex/Documents/MATLAB/screws');
+start = tic;
+[Ri, Ro] = deal(.12, .15);  % 50cm 70 cm
+
+% material moduli for internal and external IAB skin
+[C1, C2] = deal(500000, 1200000);
+% IAB material density
+[rho, nu] = deal(.85/386000, .45);  % , .45 cue from dynamics of recatangular block example
+ri = .1; % meters
+close all
+[P_Pa, model, ro, result] = bvp_free(C1, C2, Ri, Ro, rho, nu, 'compress', ri);
+P_psi = PressurePsi(P_Pa);
+fprintf('Time to run: %f seconds', toc(start))
+% Examine solution III
+homedir = '/home/lex/';
+full_path=fullfile(homedir, savedir);
+% Plot the displacements
+figure(1)
+subplot(131)
+pdeplot3D(model,'ColorMapData',result.Displacement.ux*1000);
+title('x-displacement')
+% : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
+colormap('jet')
+% colorbar('off')
+
+subplot(132)
+pdeplot3D(model,'ColorMapData',result.Displacement.uy*1000);
+xlabel('Time')
+title('y-displacement')
+colormap('jet')
+% colorbar('off')
+
+subplot(133)
+pdeplot3D(model,'ColorMapData',result.Displacement.uz*1000);
+title('z-displacement')
+% : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
+colormap('jet')
+
+figure(2)
+subplot(131)
+pdegplot(model,'CellLabels','on','FaceAlpha',0.6,'FaceLabels','off')
+title('IAB Skins');
+
+subplot(132)
+pdeplot3D(model)
+title('Mesh Model')
+
+subplot(133)
+pdeplot3D(model,'ColorMapData',result.VonMisesStress);
+title('Stress distribution')
+colormap('jet')
+%% Multisphere example IV (Compression)
+close all; clc; 
+
+start = tic;
+[Ri, Ro] = deal(.10, .19);  % 50cm 70 cm
+
+% material moduli for internal and external IAB skin
+[C1, C2] = deal(11e11, 22e9);
+% IAB material density
+[rho, nu] = deal(2e-5, .495);  % 45/386 cue from dynamics of recatangular block example
+ri = .08; % meters
+close all
+[P, model, ro, result] = bvp_free(C1, C2, Ri, Ro, rho, nu, 'compress', ri)
+fprintf('Time to run: %f seconds', toc(start))
+
+%homedir = '/Users/olalekanogunmolu/';
+full_path=fullfile(homedir, savedir);
+% Plot the displacements
+figure(1)
+subplot(131)
+pdeplot3D(model,'ColorMapData',result.Displacement.ux*10);
+title('x-displacement')
+% : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
+colormap('jet')
+% colorbar('off')
+
+subplot(132)
+pdeplot3D(model,'ColorMapData',result.Displacement.uy*10);
+xlabel('Time')
+title('y-displacement')
+colormap('jet')
+% colorbar('off')
+
+subplot(133)
+pdeplot3D(model,'ColorMapData',result.Displacement.uz*10);
+title('z-displacement')
+% : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
+colormap('jet')
+
+figure(2)
+subplot(131)
+pdegplot(model,'CellLabels','on','FaceAlpha',0.6,'FaceLabels','off')
+title('IAB Skins');
+
+subplot(132)
+pdeplot3D(model)
+title('Mesh Model')
+
+subplot(133)
+pdeplot3D(model,'ColorMapData',result.VonMisesStress);
+title('Stress distribution')
 colormap('jet')
