@@ -42,10 +42,12 @@ function [P, model, ro, result] = bvp_free(C1, C2, Ri, Ro, rho,...
     % relationship between radii in both configurations
     % ro = (Ro^3 + ri^3 - Ri^3)^(1/3);
 
-    %specify contact-free pressure as a function handle (see thesis)
-    fun = @(R, r) 2.* C1*((1./r)-((R.^6)./(r.^7))) + ...
-               2.* C2*((r.^5)./(R.^6) - (R.^10)./(r.^11));
-    
+%     %specify contact-free pressure as a function handle (see thesis)
+%     fun = @(R, r) 2.* C1*((r./R.^2)-((R.^4)./(r.^5))) + ...
+%                2.* C2*((r.^3)./(R.^4) - (R.^2)./(r.^3));
+    fun = @(R, r) (2.* (C2.*r.^2 + C1 .* R.^2).*(r.^6 -...
+                R.^6))./(r.^5.*R.^4);
+
     if strcmp(mode, 'extend')
         P = integral(@(R)fun(R, ro), Ri, Ro);
     elseif strcmp(mode, 'compress')  % shrink radii as specified
