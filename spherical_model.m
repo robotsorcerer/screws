@@ -55,11 +55,15 @@ structuralBodyLoad(model,'GravitationalAcceleration',[0;0;-9.8]);
 
 %% Multisphere Example I (Extension);
 close all; clc; clear all
-homedir = '/home/lex/';
+%homedir = '/home/lex/';
+homedir = '/Users/olalekanogunmolu/';
+this_path = fullfile(homedir, 'Documents/MATLAB/screws');
 savedir = 'Documents/Papers/PhDThesis/figures/deformation';
+full_path=fullfile(homedir, savedir);
 
+cd(this_path);
 % Testing BVP for Contact free system
-cd('/home/lex/Documents/MATLAB/screws');
+%cd('/home/lex/Documents/MATLAB/screws');
 start = tic;
 [Ri, Ro] = deal(.1, .15);  % 50cm 70 cm
 
@@ -72,9 +76,6 @@ ri = .13; % meters
 P_psi = PressurePsi(P_Pa);
 fprintf('Time to run: %f seconds', toc(start))
 % Examine solution I
-%homedir = '/Users/olalekanogunmolu/';
-homedir = '/home/lex/';
-full_path=fullfile(homedir, savedir);
 % Plot the displacements
 figure(1)
 subplot(131)
@@ -111,6 +112,30 @@ pdeplot3D(model,'ColorMapData',result.VonMisesStress);
 title('Stress distribution')
 colormap('jet')
 
+% Example I with linear model and dirichlet condition
+otherpath = 'Documents/superchicko/sofa/IAB8/compoz';
+sphere_path=fullfile(homedir, otherpath, 'sphere.STL');
+model2 = createpde(2);
+importGeometry(model2, sphere_path);
+
+G = C1/(2.*(1+rho));
+G2 = C2/(2.*(1+rho));
+mu = 2*G*rho/(1-rho);
+c = [2*G+mu; 0; G;   0; G; mu; 0;  G; 0; 2*G+mu];
+f = [0 0]'; % No body forces
+specifyCoefficients(model2, 'm', rho, 'd', 0, 'c', c, 'a', 0, 'f', f);
+% apply ri and r0 along internal and external radii of SoRo
+symBC = applyBoundaryCondition(model,'dirichlet','Face',[1,2],'u',[ri, ro],'EquationIndex',1);
+% set zero initial displacements and velocities
+setInitialConditions(model, 0, 0);
+generateMesh(model,'Hmax',Ro/8,'MesherVersion','R2013a');
+% Linear solution
+tfinal = 3e-3;
+tlist = linspace(0,tfinal,100);
+result2 = solvepde(model,tlist);
+xc = 1.25;
+yc = 0;
+u4Linear = interpolateSolution(result,xc,yc,2,1:length(tlist));
 %% Multisphere example II (Extension)
 close all; clc; 
 
@@ -120,6 +145,9 @@ start = tic;
 % material moduli for internal and external IAB skin
 [C1, C2] =  deal(500000, 600000);
 % IAB material density
+G = C2/(2.*(1+rho)); %2*C2*rho
+mu = 2*G*rho/(1-rho);
+c = [2*G+mu; 0; G;   0; G; mu; 0;  G; 0; 2*G+mu];
 [rho, nu] = deal(1e-4, .45);  %deal(.38/386., .4995); %% cue from dynamics of recatangular block example
 ri = .12; % meters
 close all
