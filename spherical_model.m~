@@ -101,15 +101,15 @@ colormap('jet')
 figure(2)
 subplot(131)
 pdegplot(model,'CellLabels','on','FaceAlpha',0.6,'FaceLabels','off')
-title('IAB Skins');
+title('IAB Skins', 'FontSize', 26);
 
 subplot(132)
 pdeplot3D(model)
-title('Mesh Model')
+title('Mesh Model', 'FontSize', 26)
 
 subplot(133)
 pdeplot3D(model,'ColorMapData',result.VonMisesStress);
-title('Stress distribution')
+title('Stress distribution', 'FontSize', 26)
 colormap('jet')
 
 % Example I with linear model and dirichlet condition
@@ -140,7 +140,7 @@ colormap('jet')
 close all; clc; 
 
 start = tic;
-[Ri, Ro] = deal(.075, .1);  % 50cm 70 cm
+[Ri, Ro] = deal(.60, .90);  % 50cm 70 cm
 
 % material moduli for internal and external IAB skin
 [C1, C2] =  deal(500000, 600000);
@@ -149,11 +149,12 @@ G = C2/(2.*(1+rho)); %2*C2*rho
 mu = 2*G*rho/(1-rho);
 c = [2*G+mu; 0; G;   0; G; mu; 0;  G; 0; 2*G+mu];
 [rho, nu] = deal(1e-4, .45);  %deal(.38/386., .4995); %% cue from dynamics of recatangular block example
-ri = .12; % meters
+ri = .95; % meters
 close all
 [P, model, ro, result] = bvp_free(C1, C2, Ri, Ro, rho, nu, 'extend', ri)
 fprintf('Time to run: %f seconds', toc(start));
 
+[ro_iso_chk, delta_volume, percent_volume] = isochoric_check(Ri, Ro, ri);
 homedir = '/home/lex/';
 % homedir = '/Users/olalekanogunmolu/';
 full_path=fullfile(homedir, savedir);
@@ -161,7 +162,7 @@ full_path=fullfile(homedir, savedir);
 figure(1)
 subplot(131)
 pdeplot3D(model,'ColorMapData',result.Displacement.ux*100);
-title('x-displacement')
+title('x-displacement', 'FontSize', 36)
 % : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
 colormap('jet')
 colorbar('off')
@@ -169,50 +170,52 @@ colorbar('off')
 subplot(132)
 pdeplot3D(model,'ColorMapData',result.Displacement.uy*100);
 xlabel('Time')
-title('y-displacement')
+title('y-displacement', 'FontSize', 36)
 colormap('jet')
 colorbar('off')
 
 subplot(133)
 pdeplot3D(model,'ColorMapData',result.Displacement.uz*100);
-title('z-displacement')
+title('z-displacement', 'FontSize', 36)
 % : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
 colormap('jet')
 
 figure(2)
 subplot(131)
 pdegplot(model,'CellLabels','on','FaceAlpha',0.6,'FaceLabels','off')
-title('IAB Skins');
+title('IAB Skins', 'FontSize', 36);
 
 subplot(132)
 pdeplot3D(model)
-title('Mesh Model')
+title('Mesh Model', 'FontSize', 36)
 
 subplot(133)
 pdeplot3D(model,'ColorMapData',result.VonMisesStress);
-title('Stress distribution')
+title('Stress distribution', 'FontSize', 36)
 colormap('jet')
 
 %% Multisphere Example III (Compression);
-close all; clc; clear all
-homedir = '/home/lex/';
-%homedir = '/Users/olalekanogunmolu/';
+close all; clc; 
+homedir = char(java.lang.System.getProperty('user.home'));
+this_path = fullfile(homedir, 'Documents/screws');
 savedir = 'Documents/Papers/PhDThesis/figures/deformation';
+full_path=fullfile(homedir, savedir);
+
+cd(this_path);
 
 % Testing BVP for Contact free system
-cd('/home/lex/Documents/MATLAB/screws');
 start = tic;
-[Ri, Ro] = deal(.12, .15);  % 50cm 70 cm
-
+[Ri, Ro] = deal(.55, .75);  % 50cm 70 cm
 % material moduli for internal and external IAB skin
 [C1, C2] = deal(500000, 1200000);
 % IAB material density
-[rho, nu] = deal(.85/386000, .45);  % , .45 cue from dynamics of recatangular block example
-ri = .1; % meters
-close all
+[rho, nu] = deal(4.8, .45);  % , .45 cue from dynamics of recatangular block example
+ri = .35; % meters
+
 [P_Pa, model, ro, result] = bvp_free(C1, C2, Ri, Ro, rho, nu, 'compress', ri);
 P_psi = PressurePsi(P_Pa);
 fprintf('Time to run: %f seconds', toc(start))
+[ro_iso_chk, delta_volume, percent_volume] = isochoric_check(Ri, Ro, ri);
 % Examine solution III
 homedir = '/home/lex/';
 full_path=fullfile(homedir, savedir);
@@ -220,7 +223,7 @@ full_path=fullfile(homedir, savedir);
 figure(1)
 subplot(131)
 pdeplot3D(model,'ColorMapData',result.Displacement.ux*1000);
-title('x-displacement')
+title('x-displacement', 'FontSize', 36)
 % : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
 colormap('jet')
 % colorbar('off')
@@ -228,28 +231,28 @@ colormap('jet')
 subplot(132)
 pdeplot3D(model,'ColorMapData',result.Displacement.uy*1000);
 xlabel('Time')
-title('y-displacement')
+title('y-displacement', 'FontSize', 36)
 colormap('jet')
 % colorbar('off')
 
 subplot(133)
 pdeplot3D(model,'ColorMapData',result.Displacement.uz*1000);
-title('z-displacement')
+title('z-displacement', 'FontSize', 36)
 % : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
 colormap('jet')
 
 figure(2)
 subplot(131)
 pdegplot(model,'CellLabels','on','FaceAlpha',0.6,'FaceLabels','off')
-title('IAB Skins');
+title('IAB Skins', 'FontSize', 36);
 
 subplot(132)
 pdeplot3D(model)
-title('Mesh Model')
+title('Mesh Model', 'FontSize', 36)
 
 subplot(133)
 pdeplot3D(model,'ColorMapData',result.VonMisesStress);
-title('Stress distribution')
+title('Stress distribution', 'FontSize', 36)
 colormap('jet')
 %% Multisphere example IV (Compression)
 close all; clc; 
@@ -272,34 +275,34 @@ full_path=fullfile(homedir, savedir);
 figure(1)
 subplot(131)
 pdeplot3D(model,'ColorMapData',result.Displacement.ux*10);
-title('x-displacement')
+title('x-displacement', 'FontSize', 36)
 % : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
 colormap('jet')
 % colorbar('off')
 
 subplot(132)
-pdeplot3D(model,'ColorMapData',result.Displacement.uy*10);
+pdeplot3D(model,result.Displacement.uy*10);
 xlabel('Time')
-title('y-displacement')
+title('y-displacement', 'FontSize', 36)
 colormap('jet')
 % colorbar('off')
 
 subplot(133)
 pdeplot3D(model,'ColorMapData',result.Displacement.uz*10);
-title('z-displacement')
+title('z-displacement', 'FontSize', 36)
 % : R_i = 50cm, R_o = 70cm, r_i = R_i + 20 (cm)
 colormap('jet')
 
 figure(2)
 subplot(131)
 pdegplot(model,'CellLabels','on','FaceAlpha',0.6,'FaceLabels','off')
-title('IAB Skins');
+title('IAB Skins', 'FontSize', 36);
 
 subplot(132)
 pdeplot3D(model)
-title('Mesh Model')
+title('Mesh Model', 'FontSize', 36)
 
 subplot(133)
 pdeplot3D(model,'ColorMapData',result.VonMisesStress);
-title('Stress distribution')
+title('Stress distribution', 'FontSize', 36)
 colormap('jet')

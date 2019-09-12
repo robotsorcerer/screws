@@ -63,8 +63,12 @@ function [P, model, ro, result] = bvp_free(C1, C2, Ri, Ro, rho,...
 %     pdeplot3D(model)
 %     title('Spherical IAB with Quadratic Tetrahedron Elements')
     fprintf('Time to mesh: %f seconds', toc(start))
-
+    
+    
     % calculate the solution
     result = solve(model);
+    
+    % return pressure to psi
+    P = PressurePsi(P);
 end
 
