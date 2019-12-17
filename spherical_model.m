@@ -70,10 +70,10 @@ ri = 13/100; % meters
 % material moduli for internal and external IAB skin
 % [C1, C2] = deal(500000, 600000); %eal(11000, 12000);
 [C1, C2] = deal(1.1e4, 2.2e4); %eal(11000, 12000);
-% IAB material density
+% IAB material density. Note pressure is already in psi
 [rho, nu] = deal(38./386, .45);  % cue from dynamics of recatangular block example
-[P_Pa, model, ro, result] = bvp_free(C1, C2, Ri, Ro, rho, nu, 'extend', ri);
-P_psi = PressurePsi(P_Pa);
+[P_psi, model, ro, result] = bvp_free(C1, C2, Ri, Ro, rho, nu, 'extend', ri);
+%P_psi = PressurePsi(P_Pa);
 fprintf('Time to run: %f seconds', toc(start))
 % Examine solution I
 % Plot the displacements
